@@ -168,6 +168,4 @@ git pull
 - `references/project-doc-template.md`: 项目文档生成清单。
 - `agents/openai.yaml`: Codex UI 展示信息。
 
-## License
 
-如果你要公开发布，建议在仓库中补充一个开源许可证，例如 MIT License。
