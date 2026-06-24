@@ -1,0 +1,4 @@
+interface:
+  display_name: "New Project Planner"
+  short_description: "Plan, research, document, and scaffold new software projects."
+  default_prompt: "Use $new-project-planner to evaluate and plan a new software project from idea to first scaffold."
