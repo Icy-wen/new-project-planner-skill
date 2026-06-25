@@ -64,6 +64,17 @@ When recommending:
 
 Load `references/project-doc-template.md` before drafting project documentation. Use the research findings and user answers as inputs.
 
+When writing docs, include a concrete resource and tooling inventory. This inventory should name what the project can use, where it comes from, and why it matters:
+
+- Reference projects/products: links, licenses, stack clues, reusable patterns, and what to copy, avoid, or differentiate from.
+- Skills and agent tools: relevant Codex skills, plugins, browser/GitHub/Notion/Zotero/image generation capabilities, or other workflow tools that can help implement, verify, publish, or document the project.
+- Technologies and libraries: frameworks, packages, UI kits, design systems, test tools, build tools, deployment targets, and observability tools.
+- APIs and integrations: model providers, payment/auth/storage/email/search/maps/data APIs, webhooks, SDKs, rate limits, pricing, authentication method, and sandbox availability.
+- Materials and assets: sample datasets, icons, fonts, images, copy references, templates, seed content, fixtures, and generated or licensed media.
+- Constraints: license compatibility, cost, privacy/security risk, vendor lock-in, offline fallback, and what must be verified before implementation.
+
+Prefer one resource inventory table over scattered mentions. Mark each item as `Use now`, `Evaluate`, `Optional`, or `Avoid for MVP`, and explain the next action for high-impact resources.
+
 Before finalizing docs, ask the user to provide one signature feature they personally imagined for the project, unless they already provided one. Capture the user-facing experience in their words, then translate it into a feasible technical implementation:
 
 - Define the smallest MVP version of the feature and, when useful, a future upgraded version.
@@ -76,6 +87,7 @@ Create or update docs appropriate to the repository and project size. For a new 
 
 - `docs/PROJECT_BRIEF.md`
 - `docs/RESEARCH.md`
+- `docs/RESOURCE_INVENTORY.md`
 - `docs/PRD.md`
 - `docs/TECHNICAL_DESIGN.md`
 - `docs/ROADMAP.md`
@@ -109,9 +121,10 @@ When invoked for a new idea, structure the answer in this order unless the user 
 1. Feasibility research summary
 2. Key questions for the user
 3. Provisional or final stack recommendation
-4. Development documentation plan
-5. Scaffold approach
-6. Step-by-step TODO list
-7. Immediate next action
+4. Resource/tooling inventory highlights
+5. Development documentation plan
+6. Scaffold approach
+7. Step-by-step TODO list
+8. Immediate next action
 
 If the user asks directly to build, do the research and questioning needed to avoid a bad foundation, then proceed to implementation once enough details are known.
