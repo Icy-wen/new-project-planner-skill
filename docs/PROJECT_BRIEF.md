@@ -1,82 +1,100 @@
-# Project Brief
+# AutoOps Content Agent Project Brief
 
-## Project name
+## Project Name
 
-Sticker Scene Studio
+AutoOps Content Agent
 
-## One-sentence goal
+Working Chinese name: 自动运营智能体.
 
-A browser-based digital sticker pack maker for individual creators that turns uploaded images into cute transparent PNG stickers and lets users arrange them into scenes or dress-up templates.
+## One-Sentence Goal
 
-## Target users
+Build a professional content-operations automation backend that discovers trends, rewrites them into brand-ready multi-platform content, schedules reviewed drafts, and uses daily performance data to adjust the next day's plan.
 
-- Individual creators who make social posts, fan art, journaling assets, profile decorations, or small digital goods.
-- Users with little design-tool experience who want a playful, low-friction sticker workflow.
-- Creators with a very small budget who prefer a free or cheap local-first web tool.
+## Target Users
 
-## Primary use cases
+The user said the first audience can be broad, so the MVP should choose a narrower first customer profile to keep the product testable:
 
-- Upload one or more images and quickly turn them into digital stickers.
-- Add sticker-like styling: white border, soft shadow, rounded cutout feel, and cute color treatment.
-- Arrange stickers on a scene canvas such as a desk, room, scrapbook page, photo frame, or toy display.
-- Place clothing, accessories, props, and decorations on a character or avatar template.
-- Export individual transparent PNG stickers, a ZIP sticker pack, or one finished scene image.
+- Primary MVP users: small brand teams, creator studios, and content operators who publish frequently across Xiaohongshu, WeChat Official Accounts, Douyin, and Bilibili.
+- Secondary users: agencies managing multiple client brands.
+- Future users: larger marketing teams that need roles, approvals, compliance review, and workspace-level analytics.
 
-## MVP scope
+## Primary Use Cases
 
-- Web app only.
-- No accounts, no payments, no printing, no cloud storage.
-- Client-side image editing with local draft persistence.
-- Upload image files from the browser.
-- Create a sticker object with move, scale, rotate, layer order, duplicate, delete, and reset controls.
-- Apply white border, color border, shadow, corner softness, and simple filters.
-- Provide a small scene template set and one dress-up template.
-- Export selected sticker as transparent PNG.
-- Export all stickers as a ZIP pack.
-- Export full canvas as PNG scene image.
-- Save the current project locally with IndexedDB or localStorage.
+1. Trend radar: collect hot topics, popular formats, keywords, hooks, and examples from selected channels or manually imported links.
+2. Brand rewrite: transform a trending topic into brand-safe content drafts that match a brand profile and each platform's content style.
+3. Multi-platform planning: turn one content idea into Xiaohongshu note, WeChat article outline, Douyin short-video script, and Bilibili video concept.
+4. Review and scheduling: let a human approve, edit, reject, or schedule generated drafts.
+5. Daily retrospective: collect yesterday's performance metrics and recommend tomorrow's topics, angles, and publishing priorities.
+6. Weekly report: summarize published content, wins, misses, and the next iteration plan.
 
-## Signature feature
+## MVP Scope
 
-User idea: upload an image and turn it into a digital sticker in one click, then use the sticker for scene building or dress-up.
+The MVP should be an automation backend, not a marketing landing page.
 
-MVP version: "Sticker Scene Desk" gives users one flow: upload image, apply sticker preset, drag it onto a cute scene or dress-up board, then export a sticker pack or scene image.
+In scope:
 
-Why it differentiates: generic design tools can make stickers, but they often start from a blank editor. This product starts from the creator's personal image and moves directly into a playful sticker-world workflow.
+- Single workspace with one brand profile.
+- Manual or semi-automated trend ingestion using URLs, pasted notes, CSV import, or approved platform APIs where available.
+- AI trend clustering and scoring.
+- Brand voice profile with audience, product, forbidden claims, tone, keywords, and examples.
+- Multi-platform draft generation for Xiaohongshu, WeChat Official Accounts, Douyin, and Bilibili.
+- Review queue with approve, edit, reject, regenerate, and schedule states.
+- Content calendar and daily task list.
+- Metric import for published content, starting with manual input or CSV.
+- Daily AI retrospective that adjusts the next day's plan.
+- Execution log and audit trail for every AI suggestion and human decision.
 
-Future version:
+Out of scope for MVP:
 
-- AI background removal.
-- AI cute-toy style conversion.
-- AI-generated scene backgrounds that match the sticker set.
-- Auto sticker pack naming, cover generation, and social preview layouts.
+- Fully automatic publishing to every platform.
+- Scraping or automation that violates platform terms.
+- Enterprise SSO, multi-client billing, and complex RBAC.
+- Ad bidding, paid media optimization, or ecommerce order operations.
+- Video rendering, advanced image generation, or in-app editing suites.
 
-## Non-goals
+## Signature Features
 
-- Physical sticker printing or fulfillment.
-- Multi-user collaboration.
-- Marketplace, community feed, creator stores, or payment features.
-- Advanced vector drawing or Canva-level general design tooling.
-- Mandatory login.
+The user's two signature features:
 
-## Success metrics
+1. "自动发现热点并改写成品牌内容"
+2. "每天复盘数据后调整明天策略"
 
-- A first-time user can upload an image, create a sticker, place it in a scene, and export within 3 minutes.
-- Exported sticker PNG has transparent background and visually clear border.
-- A user can create at least 6 stickers in a single pack without account setup.
-- Browser performance remains smooth with 20 sticker objects on a typical laptop.
-- Local draft reload works after browser refresh.
+MVP version:
+
+- The operator provides a brand profile and channel priorities.
+- The system ingests trend candidates from supported sources or manual inputs.
+- The agent clusters trends, scores fit with the brand, and generates platform-specific drafts.
+- After the user imports daily metrics, the agent writes a daily retrospective and changes tomorrow's topic priorities, hooks, and posting plan.
+
+Future upgraded version:
+
+- Approved official connectors continuously collect channel trends and metrics.
+- The agent runs small experiments across hooks, formats, and posting windows.
+- The system learns brand-specific performance patterns and recommends content bets with confidence scores.
+- Teams can set compliance rules and require approval from brand/legal reviewers before publishing.
+
+## Success Metrics
+
+MVP is useful when it can consistently achieve at least one of these:
+
+- Save a content operator 2+ hours per day.
+- Generate 20 usable content drafts per day across selected platforms.
+- Produce one clear daily retrospective and one next-day plan without manual analysis.
+- Keep AI draft approval rate above 40% after brand profile tuning.
+- Reduce weekly planning time from hours to under 30 minutes.
 
 ## Assumptions
 
-- Initial users are desktop-first, with mobile support as a responsive polish item.
-- Users own or have rights to the images they upload.
-- Low budget means AI should be optional and rate-limited, or implemented later with user-provided API keys.
-- The first version prioritizes delightful workflow over perfect automated background removal.
+- AI capability matters more than minimizing infrastructure complexity.
+- The product should feel like a professional backend: dense, operational, and built for repeated work.
+- Platform APIs for Xiaohongshu, Douyin, Bilibili, and WeChat must be verified case by case; the MVP should not depend on full auto-publishing access.
+- Human approval remains required before publishing in the first version.
+- "All users" is too broad for validation, so small content teams and creator studios are the recommended first test segment.
 
-## Open questions
+## Open Questions
 
-- Should the MVP include a manual background eraser, or only border and crop controls?
-- Should exported ZIP files include metadata such as sticker names and pack cover?
-- Which file size limits should be enforced for uploads?
-- Which scene and dress-up templates best match the first creator niche?
+- Which brand/category should the first demo workspace target: consumer goods, local services, education, SaaS, personal IP, ecommerce, or another vertical?
+- Should the first version support only Chinese content, or Chinese plus English?
+- Will the product manage one brand per workspace or multiple brands/clients from day one?
+- Which platform is the first true connector priority if only one can be integrated deeply?
+- Should approved content be exported for manual publishing, pushed to a drafting API, or scheduled for direct publishing where official APIs allow it?

@@ -1,164 +1,189 @@
-# Product Requirements Document
+# PRD: AutoOps Content Agent
 
-## Problem statement
+## Problem Statement
 
-Individual creators want to make cute digital sticker packs from their own images, but general design tools are broad and can feel slow for this specific workflow. The product should turn a personal image into a styled sticker, then let users build a scene or dress-up composition without accounts, payments, or printing.
+Content operators need to publish high-frequency, platform-native content while constantly reacting to trends and performance data. Today this usually requires separate tools for trend watching, copywriting, scheduling, analytics, and reporting. The result is slow planning, repetitive rewriting, weak feedback loops, and inconsistent brand voice.
 
-## User segments
+AutoOps Content Agent solves this by providing an AI-powered operations backend that turns trends into brand-ready content packages and uses daily metrics to adjust the next plan.
 
-- Social creator: wants quick assets for posts, stories, banners, and profile decoration.
-- Digital journal user: wants sticker PNGs for planners, notes, scrapbooks, and moodboards.
-- Fan artist or small creator: wants to convert drawings into a reusable digital sticker pack.
-- Casual maker: wants a playful browser tool, not a professional editor.
+## Personas
 
-## User journeys
+| Persona | Need | Pain |
+| --- | --- | --- |
+| Solo creator or personal brand operator | Publish frequently with limited time | Hard to track trends and rewrite for each platform |
+| Small brand content operator | Maintain brand tone and output volume | Repetitive drafting, manual reports, scattered approvals |
+| Agency content manager | Manage multiple client calendars | Hard to standardize quality and prove weekly progress |
+| Growth lead | Connect content experiments to results | Reports do not translate into next actions |
 
-### Journey 1: Create a sticker pack
+## User Journeys
 
-1. User opens the app.
-2. User uploads several images.
-3. App creates sticker items with a default cute white border and soft shadow.
-4. User adjusts border thickness, shadow, rotation, and names.
-5. User exports all stickers as a ZIP pack.
+### Journey 1: Configure Brand Brain
 
-Acceptance criteria:
-
-- At least one uploaded image can become a transparent PNG sticker.
-- The app exports all current stickers into a ZIP file.
-- The user does not need to sign in.
-
-### Journey 2: Build a sticker scene
-
-1. User selects a scene template.
-2. User drags stickers from the tray onto the canvas.
-3. User scales, rotates, layers, duplicates, and deletes stickers.
-4. User exports the whole scene as a PNG.
+1. User creates a workspace.
+2. User enters brand category, target audience, product/service, tone, banned claims, competitor references, and example posts.
+3. System generates a brand profile summary and content guardrails.
+4. User approves or edits the brand profile.
 
 Acceptance criteria:
 
-- Canvas supports move, scale, rotate, layer order, duplicate, delete, undo-ready state updates.
-- Exported scene visually matches the canvas.
+- The workspace has a saved brand profile.
+- Brand profile can be used by generation prompts.
+- Banned terms and prohibited claims are enforced in draft review.
 
-### Journey 3: Dress-up composition
+### Journey 2: Discover Trends and Generate Drafts
 
-1. User selects a character or avatar template.
-2. User drags clothing, accessories, props, or user-created stickers onto the figure.
-3. User adjusts placement and layers.
-4. User exports the dressed-up image.
+1. User imports trend candidates through links, CSV, pasted notes, or supported connectors.
+2. System normalizes each trend into title, source, topic, format, sample hook, and estimated relevance.
+3. Agent clusters similar trends and scores brand fit.
+4. User selects trend clusters or asks AI to choose.
+5. Agent generates draft packages for Xiaohongshu, WeChat Official Accounts, Douyin, and Bilibili.
 
 Acceptance criteria:
 
-- One MVP dress-up template is included.
-- Template layers are locked or protected from accidental deletion.
-- User stickers can be placed above or below template regions.
+- At least 10 trend candidates can be imported.
+- Trends are clustered and ranked.
+- User can generate at least 20 usable drafts in one session.
+- Each draft shows source trend, target platform, hook, body/script outline, tags, and rationale.
 
-## Functional requirements
+### Journey 3: Review and Schedule
 
-### Upload and asset intake
+1. Drafts enter a review queue.
+2. User edits, regenerates, approves, rejects, or schedules each draft.
+3. Approved drafts appear on the content calendar.
+4. The system records status changes and prompt versions.
 
-- Accept PNG, JPG, and WebP uploads.
-- Reject files above the configured maximum size.
-- Generate an object URL or bitmap preview.
-- Preserve original file dimensions in metadata.
-- Provide upload error messages for unsupported files.
+Acceptance criteria:
 
-### Sticker creation
+- Every draft has a status: draft, needs_review, approved, scheduled, published, rejected, archived.
+- Calendar shows scheduled content by platform and date.
+- Regeneration preserves version history.
+- Manual edits are saved separately from AI-generated text.
 
-- Create a sticker object from an uploaded image.
-- Apply default preset: white border, subtle shadow, no background.
-- Provide controls for border width, border color, shadow, rotation, scale, opacity, and corner softness.
-- Allow duplicate, delete, rename, and reset style.
+### Journey 4: Daily Retrospective and Tomorrow Plan
 
-### Editor canvas
+1. User imports metrics for yesterday's published content.
+2. System calculates performance by topic, platform, format, hook, and posting time.
+3. Agent explains what worked, what missed, and what changed.
+4. Agent updates tomorrow's topic priorities and recommended drafts.
 
-- Provide a central scene canvas.
-- Support drag, scale, rotate, snap-to-center guides, layer order, and canvas clear.
-- Provide a sticker tray for created stickers.
-- Provide template picker for scene and dress-up modes.
-- Maintain a serializable project state.
+Acceptance criteria:
 
-### Export
+- User can enter or import metrics for published items.
+- Daily report includes wins, misses, causes, and next actions.
+- Tomorrow's plan references yesterday's data.
+- The system avoids overconfident conclusions when sample size is small.
 
-- Export selected sticker as transparent PNG.
-- Export all stickers as ZIP.
-- Export full scene as PNG.
-- Use predictable file names based on sticker names or timestamps.
+## Functional Requirements
 
-### Local persistence
+### Workspace and Brand Profile
 
-- Save project state locally.
-- Restore last project after refresh.
-- Provide manual "new project" action.
-- Avoid cloud storage in MVP.
+- Create a single workspace for MVP.
+- Store brand name, category, audience, offer, differentiators, tone, taboo topics, banned terms, compliance notes, example content, and competitor references.
+- Generate a normalized "brand voice card" for AI prompts.
 
-### AI-ready capability
+### Trend Ingestion
 
-- Design the app so AI background removal and AI style conversion can be plugged in later.
-- Keep AI calls behind an adapter interface.
-- Allow fallback to manual controls if AI is unavailable.
+- Support manual input, URL input, CSV import, and fixture data.
+- Support connector interface for future APIs.
+- Store source platform, source URL, title, raw text, tags, detected topic, detected format, engagement signals if available, and import timestamp.
 
-## Signature feature spec: Sticker Scene Desk
+### Trend Scoring
 
-### User story
+- Score each trend by brand fit, freshness, channel relevance, content effort, risk, and expected reuse across platforms.
+- Let users override scores.
 
-As an individual creator, I want to upload an image and instantly turn it into a cute digital sticker, then place it into a scene or dress-up board, so I can create a shareable sticker pack or scene without learning a complex design tool.
+### Draft Generation
 
-### MVP behavior
+- Generate platform-specific draft packages:
+  - Xiaohongshu: title options, opening hook, body, hashtags, image/video brief.
+  - WeChat Official Account: headline options, article outline, intro, section bullets, CTA.
+  - Douyin: 15-60 second script, opening 3 seconds, shot list, caption, hashtags.
+  - Bilibili: video title, intro, outline, talking points, cover/title direction.
+- Include reasoning, source trend, brand alignment notes, and risks.
 
-- User uploads an image.
-- The app creates a styled sticker with a white border and soft shadow.
-- The sticker appears in the tray and on the current canvas.
-- User can drag the sticker into a scene or dress-up template.
-- User exports sticker or scene as PNG.
+### Review Queue
 
-### Edge cases
+- Approve, reject, edit, regenerate, duplicate, and schedule.
+- Track versions and user decisions.
+- Surface warnings for banned terms, unverified claims, and risky wording.
 
-- Very large image: downscale for editing, keep metadata, warn user.
-- Image with solid background: MVP may not remove it automatically; user can crop or accept the result.
-- Transparent PNG upload: preserve transparency.
-- Browser memory pressure: limit max canvas size and number of active stickers.
+### Calendar and Execution
 
-### Acceptance criteria
+- Show approved and scheduled drafts by date and platform.
+- MVP supports manual publishing/export package.
+- Connector-ready execution jobs should exist but can run in mock/manual mode.
 
-- One-click upload-to-sticker flow takes no more than two visible actions after file selection.
-- Default sticker preset is visually recognizable as a digital sticker.
-- Exported sticker PNG keeps transparency outside the sticker boundary.
-- The same sticker can be used in both scene mode and dress-up mode.
+### Metrics and Retrospective
 
-### Future version
+- Import metrics manually or through CSV.
+- Track impressions/views, likes, comments, shares, saves/favorites, follows, clicks, conversions if provided, and notes.
+- Generate daily and weekly reports.
+- Recommend tomorrow's topics, channels, hooks, and content formats.
 
-- AI background removal.
-- AI cute toy style preset.
-- AI scene background generation.
-- Auto sticker pack cover and social preview.
+## Signature Feature Spec
 
-## Non-functional requirements
+### User Story
 
-- Desktop-first responsive web app.
-- No account required.
-- Works in current Chromium, Firefox, Safari, and Edge where feasible.
-- Avoid heavy backend requirements.
-- Keep initial load lightweight; lazy-load editor-only dependencies if needed.
-- Do not upload user images unless the user explicitly invokes an AI or cloud feature.
+As a content operator, I want the system to discover hot topics, rewrite them into brand-safe drafts, and revise tomorrow's plan based on yesterday's results, so that I can run a daily content operation without spending hours on research and reporting.
 
-## UX and style requirements
+### MVP Behavior
 
-- Cute toy-inspired visual direction.
-- First screen is the actual editor, not a marketing landing page.
-- Three-zone editor layout: asset/template panel, central canvas, style/export panel.
-- Use icon buttons for common editor actions with tooltips.
-- Avoid nested cards and overly decorative layouts.
-- Keep controls compact and understandable.
-- Use playful template thumbnails and sticker presets.
+- User imports trend inputs.
+- Agent selects high-fit trends and explains why.
+- Agent generates cross-platform content packages.
+- User approves and schedules drafts.
+- User imports metrics the next day.
+- Agent writes a daily retrospective and updates tomorrow's recommended plan.
 
-## Analytics or success signals
+### Edge Cases
 
-For MVP without accounts, use local-only counters during development or privacy-friendly analytics later:
+- Trend data is sparse or duplicated.
+- A trend conflicts with brand values or compliance notes.
+- Generated content contains claims that require proof.
+- Platform metrics are incomplete.
+- User disagrees with AI recommendations.
+- The same trend is already used too often.
 
-- Upload started.
-- Sticker created.
-- Scene template selected.
-- Sticker exported.
-- ZIP exported.
-- Draft restored.
-- Export failed.
+### Acceptance Criteria
+
+- The system can complete one full daily loop using fixture or manual data.
+- The daily report references actual metrics, not only generic advice.
+- Tomorrow's plan changes when the metric input changes.
+- Every recommendation includes confidence and reasoning.
+- User can override AI recommendations and the override is stored.
+
+### Future Version
+
+- Continuous trend ingestion through official APIs and approved sources.
+- Direct scheduling/publishing where official APIs allow it.
+- A/B testing for hooks and formats.
+- Brand/legal review workflows.
+- Multi-brand agency mode.
+
+## Non-Functional Requirements
+
+- Professional backend UX with dense but readable tables, filters, side panels, and audit logs.
+- Clear loading/error states for AI and connector jobs.
+- Human approval before public publishing.
+- Prompt and output versioning for auditability.
+- Background jobs must be retryable and observable.
+- Data privacy controls for brand materials and unpublished drafts.
+- The system should degrade gracefully when a connector is unavailable.
+
+## UX and Style Requirements
+
+- Professional operations dashboard, not a landing page.
+- First screen should be a working command center: trend radar, review queue, calendar, and retrospective status.
+- Use restrained colors, compact tables, badges, filters, tabs, and icon buttons.
+- Avoid marketing-style hero sections or decorative card-heavy layouts.
+- Make high-volume review fast: keyboard-friendly, bulk actions, status filters, and side-by-side source/draft view.
+
+## Analytics and Success Signals
+
+- Number of trend candidates processed per day.
+- Number of drafts generated, edited, approved, rejected, and scheduled.
+- Draft approval rate.
+- Time from trend import to approved draft.
+- Number of daily retrospectives generated.
+- User overrides of AI recommendations.
+- Content performance by platform, format, topic, and hook.

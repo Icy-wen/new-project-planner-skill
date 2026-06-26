@@ -1,89 +1,125 @@
-# Research
+# Research: AutoOps Content Agent
 
-## Search date
+## Search Date
 
-2026-06-24
+2026-06-26
 
-## Sources reviewed
+## Sources Reviewed
 
-- Fabric.js GitHub: https://github.com/fabricjs/fabric.js
-- Konva GitHub: https://github.com/konvajs/konva
-- tldraw GitHub: https://github.com/tldraw/tldraw
-- Sticker Mule Studio: https://www.stickermule.com/studio
-- Canva sticker maker: https://www.canva.com/create/stickers/
-- Printify API docs: https://developers.printify.com/
+Current GitHub repository metadata was checked for related automation and agent projects:
 
-## Comparable projects and products
+- n8n: https://github.com/n8n-io/n8n
+- Dify: https://github.com/langgenius/dify
+- Activepieces: https://github.com/activepieces/activepieces
+- LangGraph: https://github.com/langchain-ai/langgraph
+- CrewAI: https://github.com/crewAIInc/crewAI
+- AutoGen: https://github.com/microsoft/autogen
+
+Official channel API capabilities for Xiaohongshu, WeChat Official Accounts, Douyin, and Bilibili still need direct verification against each platform's latest documentation and account permissions before implementation.
+
+## Comparable Projects and Products
 
 | Name | Link | Audience | Core features | Stack clues | License/pricing | Maintenance/adoption | Strengths | Gaps for this project |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Fabric.js | https://github.com/fabricjs/fabric.js | Developers building canvas editors | Canvas objects, scale, move, rotate, filters, JPG/PNG/JSON/SVG I/O | TypeScript/JavaScript, HTML5 canvas | MIT | High adoption, about 31.3k GitHub stars on review date | Mature, permissive, good fit for object editing and export | Does not provide product UX, sticker-specific workflows, or AI |
-| Konva | https://github.com/konvajs/konva | Developers building interactive canvas apps | Drag/drop, animation, shapes, mobile/desktop interactivity | JavaScript canvas framework | View license on GitHub; commonly used in React canvas apps | Active, about 14.6k GitHub stars; latest release shown as Apr 30, 2026 | Strong interaction model and performance | Export and image-editing workflow may need more custom code than Fabric.js |
-| tldraw | https://github.com/tldraw/tldraw | Teams building infinite canvas apps | Infinite canvas, drawing, collaboration-style primitives | React SDK, TypeScript | Development use is free; production use requires a license key | Very high adoption, about 48.2k GitHub stars; latest release shown as Jun 12, 2026 | Rich editor foundation and polished interaction model | Production license cost is a poor fit for a very low-budget MVP |
-| Sticker Mule Studio | https://www.stickermule.com/studio | Sticker buyers and makers | Online sticker design for printed stickers | Hosted product | Commercial | Mature product | Shows demand for simple sticker design | Print-first, not focused on reusable digital scene building |
-| Canva Sticker Maker | https://www.canva.com/create/stickers/ | General creators and marketers | Templates, design editing, export and print-adjacent flows | Hosted design suite | Freemium/commercial | Very broad adoption | Strong template and export UX | Too broad; not optimized for fast personal sticker-to-scene workflow |
-| Printify API | https://developers.printify.com/ | Print-on-demand sellers | Product creation, uploads, orders, webhooks | Server-side REST API | Commercial fulfillment | Production-oriented | Useful if printing is added later | Not needed for current fully digital scope |
+| n8n | https://github.com/n8n-io/n8n | Automation builders, ops teams | Visual workflow automation, integrations, AI nodes, self-hosting | TypeScript | GitHub license showed NOASSERTION; verify fair-code terms | 194k stars, updated 2026-06-26 | Huge integration ecosystem and execution logs | Too general; does not provide content-ops intelligence by default |
+| Dify | https://github.com/langgenius/dify | AI app builders, agent workflow teams | Agentic workflows, prompt/app management, RAG, no-code AI app setup | TypeScript, Python, Next.js topics | GitHub license showed NOASSERTION; verify current license | 146k stars, updated 2026-06-26 | Strong AI app configuration and workflow debugging | Not focused on social content operations or daily growth retrospectives |
+| Activepieces | https://github.com/activepieces/activepieces | No-code automation users, AI workflow teams | Workflow automation, MCP tools, AI agents | TypeScript | GitHub license showed NOASSERTION; verify current license | 23k stars, updated 2026-06-26 | Practical connector model and AI automation positioning | Broad automation platform; content strategy layer must be built separately |
+| LangGraph | https://github.com/langchain-ai/langgraph | AI engineers | Resilient stateful agents, graph workflows, memory/checkpointing | Python | MIT | 35k stars, updated 2026-06-26 | Good fit for plan/draft/review/analyze loops | Framework only; needs product UI, connectors, and ops workflows |
+| CrewAI | https://github.com/crewAIInc/crewAI | AI app developers | Multi-agent role orchestration | Python | MIT | 54k stars, updated 2026-06-26 | Useful for future "strategy + copy + analyst" roles | Multi-agent abstraction may be unnecessary for MVP |
+| AutoGen | https://github.com/microsoft/autogen | AI engineers and researchers | Agentic AI programming framework | Python | CC-BY-4.0 shown by GitHub API; verify usage fit | 59k stars, updated 2026-04-15 | Mature multi-agent concepts | More framework-level than product-ready for this MVP |
 
-## Existing landscape
+## Existing Landscape
 
-The market has many general-purpose design tools and several print-sticker workflows. Open-source canvas libraries are mature enough to build an editor without inventing core canvas interactions. The under-served area is a lightweight digital-only sticker pack workflow that combines personal image upload, sticker styling, scene building, and dress-up.
+The market is split into three broad categories:
 
-## Opportunity and gap
+1. General workflow automation: n8n, Activepieces, Zapier-like systems. These are strong at connecting tools and executing workflows, but they rely on users to design the content strategy.
+2. AI app and agent platforms: Dify, LangGraph, CrewAI, AutoGen. These help build AI workflows, but they do not ship an opinionated content-operations backend.
+3. Social/content management products: scheduling, analytics, and content calendars. They often manage publishing and reporting, but their AI layer is usually shallow or template-based.
 
-The project can avoid competing head-to-head with large design suites by focusing on a narrow emotional workflow:
+The opportunity is to combine the best parts into a content-ops-specific system: trend discovery, brand interpretation, platform-specific drafting, review workflows, and feedback loops.
 
-- Personal images become cute digital objects quickly.
-- Scene and dress-up boards make the output more playful than a plain PNG export.
-- Local-first, no-login usage lowers friction and cost.
-- Optional AI can be added only where it creates visible value.
+## Opportunity and Gap
 
-## Major risks
+AutoOps Content Agent should not compete as another generic workflow builder. It should be opinionated about one job:
 
-- Background removal quality: fully automatic cutouts are hard without AI and may be costly with AI.
-- Browser performance: large uploads and many layered stickers can slow canvas rendering.
-- Export correctness: transparent PNG and ZIP export need careful testing across browsers.
-- Copyright and user uploads: the product should remind users to upload content they can use.
-- Scope creep: adding marketplace, social sharing, accounts, and AI too early would undermine the low-budget constraint.
+Run a daily content operation loop.
 
-## Build difficulty
+Differentiation:
 
-MVP difficulty: moderate.
+- Brand-aware trend rewriting, not just generic content generation.
+- Cross-platform adaptation for Xiaohongshu, WeChat, Douyin, and Bilibili.
+- Daily retrospective that changes tomorrow's content plan.
+- Professional backend workflow with review states, audit logs, and metrics.
+- Connector abstraction that can work with official APIs, manual import/export, and future deeper integrations.
 
-The first version is feasible with a small client-side app because it avoids accounts, payments, backend storage, and physical fulfillment. The hardest MVP parts are canvas state management, PNG export quality, local draft persistence, and a pleasant editor UX.
+## Feasibility Assessment
 
-AI-enhanced difficulty: higher.
+Technical complexity: Medium-high.
 
-AI cutout, style transfer, and background generation require hosted APIs, user keys, rate limits, or a local model strategy. These should be treated as P1/P2 capabilities after the core editor proves useful.
+- The AI planning and drafting loop is feasible with current LLMs and stateful agent frameworks.
+- The backend, review queue, calendar, and reports are straightforward web application work.
+- The highest uncertainty is platform data access and publishing permissions.
 
-## Recommended MVP boundary
+Time and cost:
 
-Build the non-AI core first:
+- A useful prototype can be built in 4-8 weeks by one focused engineer.
+- Production-grade connectors, compliance controls, and reliable analytics likely need several more months.
+- LLM usage cost can be controlled by caching, summarizing trend inputs, limiting regeneration, and using smaller models for classification/scoring.
 
-- Upload image.
-- Create sticker object.
-- Add border, shadow, and simple effects.
-- Place stickers into scene and dress-up templates.
-- Export transparent PNG, full scene PNG, and ZIP pack.
-- Save local draft.
+Dependencies:
 
-Defer:
+- LLM provider with reliable Chinese content ability.
+- PostgreSQL for durable content and metrics.
+- Redis/worker queue for scheduled background jobs.
+- Platform APIs or manual import/export workflows.
 
-- AI cutout and style transfer.
-- Accounts and cloud sync.
-- Public gallery or marketplace.
-- Printing and fulfillment.
+Data availability:
 
-## Differentiation strategy
+- WeChat Official Account, Douyin, Bilibili, and Xiaohongshu data access varies by account type, approval, and endpoint.
+- For MVP, data should be abstracted behind connector interfaces and seeded with fixtures/manual input so the product is not blocked by API approval.
 
-Position the product as "a cute digital sticker scene desk" rather than a generic design editor. The default state should invite users to upload a personal image and immediately play with it in a scene. Templates, presets, and export formats should all serve the sticker-pack workflow.
+Legal/compliance risk:
 
-## Signature feature comparison
+- Avoid unofficial scraping, credential sharing, or automated actions that violate platform terms.
+- Keep human approval before publication.
+- Store brand rules, prohibited claims, and audit logs.
+- Make source attribution and generated-content review visible.
 
-The signature feature combines three steps that are usually split across tools: image upload, sticker styling, and scene/dress-up composition. This makes the experience feel like a toy-like creator workflow, not a blank professional editor.
+Operational risk:
 
-## Risks to verify later
+- AI may produce inaccurate claims, sensitive wording, duplicated content, or platform-inappropriate output.
+- Daily optimization can overfit small samples.
+- Publishing workflows must handle failed jobs, rate limits, and account permission errors.
 
-- Whether Fabric.js or Konva gives better export quality for transparent sticker border rendering.
-- Whether a browser-only background removal package is good enough for MVP use.
-- ZIP export memory limits with 20 to 50 stickers.
-- User willingness to accept manual cleanup before AI is added.
+## Recommended MVP Boundary
+
+Build the first version around a semi-automated content loop:
+
+1. Configure brand profile.
+2. Import or collect trend candidates.
+3. Score and cluster trends.
+4. Generate cross-platform draft packages.
+5. Human review and scheduling.
+6. Import daily metrics.
+7. Generate daily retrospective and tomorrow's adjusted plan.
+
+Do not require direct auto-publishing in the MVP. Provide export packages and connector-ready architecture first.
+
+## Signature Feature Fit
+
+The signature feature fills a clear gap:
+
+- Generic AI writers generate content but do not maintain a feedback loop.
+- Generic automation tools execute workflows but do not understand brand/content strategy.
+- Analytics dashboards report numbers but often do not translate them into tomorrow's content decisions.
+
+This project should make the "content ops brain" explicit: it observes trends, maps them to brand positioning, produces drafts, watches outcomes, and learns the next day's priorities.
+
+## Risks to Verify
+
+- Latest platform API access, publishing permissions, data scopes, and review requirements.
+- Whether each platform allows automated scheduling or only draft/export workflows.
+- Whether target users trust AI-generated brand content enough to approve it daily.
+- LLM quality for Chinese social content and platform-specific formats.
+- Cost per day when generating 20+ drafts plus summaries and retrospectives.
+- Whether initial users prefer a dashboard workflow or a chat-first workflow inside the backend.

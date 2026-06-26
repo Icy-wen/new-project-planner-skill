@@ -1,94 +1,109 @@
-# Roadmap
+# Roadmap: AutoOps Content Agent
 
-## Milestone 0: Research and setup
+## Milestone 0: Research and Setup
 
-Goal: lock MVP scope and prepare the project foundation.
+Goal: remove major uncertainty before building too much UI.
 
-- Confirm project name and initial creator niche.
-- Confirm max upload size and supported file formats.
-- Create Next.js, TypeScript, Tailwind, and test setup.
-- Pick Fabric.js as the initial canvas engine.
-- Add base editor layout and design tokens.
+- Verify official API access and policy constraints for Xiaohongshu, WeChat Official Accounts, Douyin, and Bilibili.
+- Select first demo vertical, such as consumer brand, personal IP, education, or SaaS.
+- Create fixture datasets for trends, brand profiles, draft examples, and daily metrics.
+- Confirm primary LLM provider and fallback model.
+- Decide whether MVP uses Python FastAPI + LangGraph or a pure TypeScript stack.
+- Set up project scaffold, linting, formatting, tests, and local Docker services.
 
-Exit criteria:
+Acceptance criteria:
 
-- App runs locally.
-- First screen opens directly to editor shell.
-- No account, payment, or backend dependency exists.
+- MVP constraints are documented.
+- One sample brand can run through the planned daily loop using fixtures.
+- Platform connector risks are listed with a fallback path.
 
-## Milestone 1: Foundation and first vertical slice
+## Milestone 1: Foundation and Command Center
 
-Goal: make one image become one sticker and export it.
+Goal: create the working backend surface.
 
-- Implement file upload.
-- Render uploaded image on canvas.
-- Add default sticker preset.
-- Support move, scale, rotate, delete, and duplicate.
-- Export selected sticker as transparent PNG.
-- Add basic local draft save.
+- Build Next.js admin shell.
+- Build FastAPI service and PostgreSQL schema.
+- Add single workspace and brand profile editor.
+- Build command center dashboard with trend radar, review queue, calendar, and retrospective status.
+- Add audit events and agent run records.
 
-Exit criteria:
+Acceptance criteria:
 
-- A user can upload an image, style it as a sticker, and export it.
-- Refreshing the page can restore the latest draft.
+- User can configure a brand profile.
+- Dashboard loads real persisted data.
+- Agent run status is visible.
 
-## Milestone 2: Core sticker pack workflow
+## Milestone 2: Trend Radar and Draft Generation
 
-Goal: make a small pack, not just one sticker.
+Goal: deliver the first valuable AI loop.
 
-- Add sticker tray.
-- Add rename and reorder.
-- Add per-sticker style controls.
-- Add ZIP export.
-- Add project reset and export error handling.
-- Add performance guardrails for large files.
+- Implement manual/CSV/fixture trend import.
+- Normalize and cluster trend candidates.
+- Score brand fit and risk.
+- Generate multi-platform draft packages.
+- Add review queue and draft versioning.
 
-Exit criteria:
+Acceptance criteria:
 
-- A user can create and export a pack of at least 6 stickers.
-- ZIP contains predictable PNG file names.
+- User can import at least 10 trend candidates.
+- Agent generates at least 20 draft items across the four target platforms.
+- Drafts can be edited, regenerated, approved, rejected, and scheduled.
 
-## Milestone 3: Sticker Scene Desk
+## Milestone 3: Calendar, Export, and Daily Retrospective
 
-Goal: make the signature feature feel distinct.
+Goal: complete the daily content-ops loop.
 
-- Add scene mode and template picker.
-- Add at least 4 scene templates.
-- Add dress-up mode and 1 locked character/avatar template.
-- Add layer controls for templates and stickers.
-- Export full scene PNG.
-- Add playful empty states and template thumbnails.
+- Build content calendar.
+- Add manual export package for approved drafts.
+- Add metric import.
+- Generate daily retrospective from metrics.
+- Update tomorrow's plan based on results.
 
-Exit criteria:
+Acceptance criteria:
 
-- A user can use the same sticker in a scene and dress-up board.
-- A finished scene exports as a share-ready PNG.
+- A full daily loop can be completed without platform API access.
+- Daily report references concrete content and metrics.
+- Tomorrow's recommendations change when metrics change.
 
-## Milestone 4: Quality, deployment, and polish
+## Milestone 4: First Real Connector
 
-Goal: make the MVP shippable.
+Goal: connect to one platform where official access is verified.
 
-- Add Playwright smoke tests.
-- Add visual QA checklist.
-- Improve responsive behavior.
-- Improve keyboard and accessibility basics.
-- Deploy to Vercel or another low-cost host.
-- Add lightweight usage/error analytics only if needed.
+- Choose first connector based on account access and documentation.
+- Implement OAuth/token setup if required.
+- Import metrics or create remote drafts where allowed.
+- Add connector error handling and retry logs.
 
-Exit criteria:
+Acceptance criteria:
 
-- Main flow passes browser smoke test.
-- App is deployed.
-- Known limitations are documented.
+- At least one real platform integration works in a test account.
+- Connector failure does not block the rest of the product.
 
-## Future ideas
+## Milestone 5: Quality, Deployment, and Polish
 
-- AI background removal.
-- AI cute toy style conversion.
-- AI-generated scenes and pack covers.
-- User-provided API key mode for low-cost AI.
-- Shareable project links.
-- Cloud project sync.
-- Public sticker pack gallery.
-- Marketplace or creator store.
-- Mobile-optimized editor.
+Goal: make the MVP demoable and usable by early testers.
+
+- Add Playwright smoke test for daily loop.
+- Add background job monitoring.
+- Add cost tracking for AI calls.
+- Improve compact professional UI states.
+- Deploy staging environment.
+- Create onboarding fixtures and sample workspace.
+
+Acceptance criteria:
+
+- Staging deployment works.
+- Main workflow passes smoke tests.
+- Early tester can complete setup and generate drafts without developer help.
+
+## Future Ideas
+
+- Multi-brand agency mode.
+- Role-based approvals and legal review.
+- Direct publishing where official APIs allow.
+- A/B test planner for hooks and formats.
+- Competitor monitoring.
+- Knowledge base for brand/product facts.
+- Image and video brief generation.
+- Auto weekly reports with export to Notion/Feishu/Email.
+- Private deployment package for enterprise users.

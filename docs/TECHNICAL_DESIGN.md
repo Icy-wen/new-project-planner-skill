@@ -1,277 +1,454 @@
-# Technical Design
+# Technical Design: AutoOps Content Agent
 
-## Stack decision and rationale
+## Stack Decision
 
-Recommended MVP stack:
+Recommended stack for an AI-capability-first automation backend:
 
-- Next.js with App Router: durable React foundation and easy future deployment.
-- TypeScript: improves maintainability for editor state and export logic.
-- Tailwind CSS: fast styling without a large design system.
-- Fabric.js: mature canvas object model, image filters, interactions, JSON state, and PNG/SVG export support.
-- Zustand or React state plus reducer: small client-side editor state layer.
-- IndexedDB via Dexie or localForage: local draft and image metadata persistence.
-- JSZip: export sticker packs.
-- Vitest and Playwright: unit tests plus browser export/editor smoke tests.
-- Vercel or static hosting: simple deployment for a low-budget web app.
+- Frontend: Next.js, TypeScript, shadcn/ui, Tailwind CSS.
+- API and agent service: Python FastAPI, Pydantic, LangGraph.
+- Database: PostgreSQL, SQLAlchemy/Alembic.
+- Queue and scheduled jobs: Redis plus Celery or RQ.
+- Object storage: S3-compatible storage such as Cloudflare R2 for media, exports, and imports.
+- AI provider layer: OpenAI-compatible adapter with model routing.
+- Auth: start with single-workspace admin auth; move to workspace/team auth later.
+- Observability: structured logs, Sentry, background job dashboard, and audit event table.
+- Deployment: Docker Compose for local development; Render/Fly.io/Railway or similar for MVP; private deployment later if needed.
 
-Deferred:
+Why this stack:
 
-- Database.
-- Auth.
-- Payments.
-- Print fulfillment.
-- Cloud storage.
+- The user prioritizes AI capability, so Python and LangGraph are a strong fit for stateful agent workflows.
+- Next.js provides a polished professional backend UI quickly.
+- PostgreSQL is reliable for content, status history, metrics, and audit logs.
+- Redis workers fit scheduled ingestion, generation, reporting, and connector jobs.
+- Keeping connectors behind interfaces prevents the MVP from depending on uncertain platform API approvals.
 
-## Architecture overview
+Alternative:
 
-The app is a client-heavy editor. The server side is only needed for static rendering and future AI endpoints. In the MVP, user images remain in the browser.
+- A pure TypeScript stack with Next.js API routes, Drizzle/Prisma, BullMQ, and LangChain.js is simpler operationally. Use it if one-service deployment matters more than agent depth.
 
-Main runtime flow:
+## Architecture Overview
 
-1. User uploads image.
-2. Asset service validates file and creates image asset metadata.
-3. Sticker service creates a sticker preset object.
-4. Canvas adapter renders and edits objects.
-5. Project store serializes canvas JSON and asset metadata.
-6. Export service renders selected sticker, all stickers, or full scene.
-7. Persistence service saves and restores local draft.
+```mermaid
+flowchart LR
+  User["Operator"] --> Web["Next.js Admin UI"]
+  Web --> API["FastAPI Backend"]
+  API --> DB[("PostgreSQL")]
+  API --> Queue["Redis Queue"]
+  Queue --> Agent["LangGraph Agent Workers"]
+  Agent --> LLM["LLM Provider Adapter"]
+  Agent --> Connectors["Platform Connector Layer"]
+  Connectors --> Sources["Manual Import / Official APIs / Export Packages"]
+  Agent --> DB
+  API --> Storage["S3/R2 Object Storage"]
+```
 
-## Folder/module structure
+## Core Modules
 
 ```text
-src/
-  app/
-    page.tsx
-    layout.tsx
-  components/
-    editor/
-      EditorShell.tsx
-      CanvasStage.tsx
-      AssetPanel.tsx
-      StylePanel.tsx
-      TemplatePanel.tsx
-      ExportPanel.tsx
-      Toolbar.tsx
-    ui/
-      Button.tsx
-      IconButton.tsx
-      Slider.tsx
-      Tooltip.tsx
-  lib/
-    canvas/
-      fabricAdapter.ts
-      stickerEffects.ts
-      templates.ts
-    export/
-      exportSticker.ts
-      exportScene.ts
-      exportZip.ts
-    persistence/
-      projectStorage.ts
-    ai/
-      aiAdapter.ts
-      noOpAiAdapter.ts
-    validation/
-      files.ts
-  state/
-    editorStore.ts
-  types/
-    project.ts
-    sticker.ts
+apps/
+  web/
+    app/
+    components/
+    features/
+      command-center/
+      trend-radar/
+      draft-review/
+      calendar/
+      retrospectives/
+    lib/api-client/
+
+services/
+  api/
+    app/
+      main.py
+      models/
+      schemas/
+      routes/
+      services/
+      connectors/
+      agents/
+      jobs/
+      prompts/
+      observability/
+    alembic/
+
+fixtures/
+  trends/
+  metrics/
+  brand_profiles/
+
+docs/
 ```
 
-## Data model
+## Data Model
 
-```ts
-type Project = {
-  id: string;
-  name: string;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
-  mode: "scene" | "dress-up";
-  canvas: SerializedCanvas;
-  assets: ImageAsset[];
-  stickers: Sticker[];
-  selectedTemplateId: string | null;
-};
+### Workspace
 
-type ImageAsset = {
-  id: string;
-  name: string;
-  mimeType: "image/png" | "image/jpeg" | "image/webp";
-  width: number;
-  height: number;
-  objectUrl?: string;
-  storageKey?: string;
-};
+- id
+- name
+- default_language
+- created_at
 
-type Sticker = {
-  id: string;
-  assetId: string;
-  name: string;
-  style: StickerStyle;
-  canvasObjectId: string;
-};
+### BrandProfile
 
-type StickerStyle = {
-  borderWidth: number;
-  borderColor: string;
-  shadowBlur: number;
-  shadowColor: string;
-  opacity: number;
-  cornerSoftness: number;
-  filterPreset: "none" | "soft" | "pop" | "pastel";
-};
+- id
+- workspace_id
+- brand_name
+- category
+- audience
+- offer
+- differentiators
+- tone
+- keywords
+- banned_terms
+- forbidden_claims
+- compliance_notes
+- examples
+- created_at
+- updated_at
+
+### TrendSource
+
+- id
+- workspace_id
+- platform
+- source_type: manual, url, csv, official_api, fixture
+- source_url
+- raw_payload
+- imported_at
+
+### TrendCandidate
+
+- id
+- workspace_id
+- source_id
+- platform
+- title
+- summary
+- raw_text
+- topic
+- format
+- tags
+- freshness_score
+- brand_fit_score
+- channel_relevance_score
+- risk_score
+- status
+- created_at
+
+### TrendCluster
+
+- id
+- workspace_id
+- title
+- summary
+- representative_trend_id
+- trend_ids
+- score
+- reasoning
+- created_at
+
+### ContentDraft
+
+- id
+- workspace_id
+- trend_cluster_id
+- platform
+- status: draft, needs_review, approved, scheduled, published, rejected, archived
+- title
+- hook
+- body
+- script
+- outline
+- hashtags
+- media_brief
+- ai_rationale
+- risk_notes
+- created_by_agent_run_id
+- current_version_id
+- scheduled_for
+- created_at
+- updated_at
+
+### DraftVersion
+
+- id
+- draft_id
+- source: ai, human
+- content_json
+- prompt_version
+- model
+- created_at
+
+### PublicationRecord
+
+- id
+- draft_id
+- platform
+- external_id
+- publish_mode: manual_export, official_api, mock
+- published_at
+- status
+- error_message
+
+### ContentMetric
+
+- id
+- publication_record_id
+- date
+- impressions
+- views
+- likes
+- comments
+- shares
+- saves
+- follows
+- clicks
+- conversions
+- notes
+
+### Retrospective
+
+- id
+- workspace_id
+- date
+- summary
+- wins
+- misses
+- insights
+- tomorrow_plan
+- confidence
+- created_by_agent_run_id
+
+### AgentRun
+
+- id
+- workspace_id
+- run_type: trend_score, draft_generation, retrospective, plan_update
+- input_json
+- output_json
+- status
+- model
+- token_usage
+- started_at
+- completed_at
+- error_message
+
+### AuditEvent
+
+- id
+- workspace_id
+- actor_type: user, agent, system
+- actor_id
+- entity_type
+- entity_id
+- action
+- before_json
+- after_json
+- created_at
+
+## API Contracts
+
+Example routes:
+
+- `POST /workspaces`
+- `GET /brand-profile`
+- `PUT /brand-profile`
+- `POST /trend-sources/import`
+- `GET /trends`
+- `POST /trends/cluster`
+- `POST /drafts/generate`
+- `GET /drafts`
+- `PATCH /drafts/{id}`
+- `POST /drafts/{id}/regenerate`
+- `POST /drafts/{id}/schedule`
+- `GET /calendar`
+- `POST /metrics/import`
+- `POST /retrospectives/generate`
+- `GET /retrospectives`
+- `GET /agent-runs/{id}`
+
+## Agent Workflow
+
+```mermaid
+stateDiagram-v2
+  [*] --> IngestTrends
+  IngestTrends --> NormalizeTrends
+  NormalizeTrends --> ClusterAndScore
+  ClusterAndScore --> SelectContentBets
+  SelectContentBets --> GenerateDrafts
+  GenerateDrafts --> ComplianceCheck
+  ComplianceCheck --> HumanReview
+  HumanReview --> Schedule
+  Schedule --> PublishOrExport
+  PublishOrExport --> CollectMetrics
+  CollectMetrics --> DailyRetrospective
+  DailyRetrospective --> UpdateTomorrowPlan
+  UpdateTomorrowPlan --> [*]
 ```
 
-## Integration contracts
+LangGraph nodes:
 
-MVP has no required external API.
+- `normalize_trends`
+- `cluster_trends`
+- `score_brand_fit`
+- `select_content_bets`
+- `generate_platform_drafts`
+- `check_brand_guardrails`
+- `summarize_metrics`
+- `diagnose_performance`
+- `update_tomorrow_strategy`
 
-Future AI adapter:
+Use checkpoints so failed or paused runs can resume.
 
-```ts
-type AiAdapter = {
-  removeBackground(input: Blob): Promise<Blob>;
-  stylizeSticker(input: Blob, preset: string): Promise<Blob>;
-  generateScene(prompt: string): Promise<Blob>;
-};
-```
+## Connector Strategy
 
-The default MVP implementation is `noOpAiAdapter`, which returns an explicit unsupported result and lets the UI show manual controls.
+Each platform connector implements:
 
-## State management
+- `import_trends()`
+- `import_metrics()`
+- `export_draft_package()`
+- `create_remote_draft()` if officially supported
+- `schedule_or_publish()` if officially supported
 
-Use a small editor store to separate UI state from Fabric.js runtime state.
+Connector modes:
 
-State categories:
+- `fixture`: demo data for development.
+- `manual`: CSV, URL, paste, or export package.
+- `official_api`: approved platform API.
+- `mock`: simulate execution for local testing.
 
-- Project metadata.
-- Asset list.
-- Sticker list.
-- Selected object id.
-- Selected template id.
-- Current editor mode.
-- Export status.
-- Error messages.
+MVP connector priority:
 
-Fabric.js should be wrapped in an adapter so React components do not directly depend on low-level canvas calls everywhere.
+1. Manual/fixture connector for all four platforms.
+2. WeChat Official Account draft or metrics connector if account permissions are available.
+3. Bilibili/Douyin/Xiaohongshu official APIs only after documentation and account scope verification.
 
-## Signature feature implementation
+Avoid unofficial scraping or credential-based browser automation for MVP.
 
-### MVP approach
+## Signature Feature Implementation
 
-The "Sticker Scene Desk" feature is implemented as a thin vertical slice:
+### Trend-to-Brand Drafting
 
-1. `AssetPanel` accepts an uploaded file.
-2. `files.ts` validates type and size.
-3. `fabricAdapter.ts` creates a Fabric image object.
-4. `stickerEffects.ts` applies a default sticker preset.
-5. The sticker is added to tray and canvas.
-6. User moves the sticker in scene or dress-up mode.
-7. Export service outputs PNG or ZIP.
+Inputs:
 
-### Border rendering strategy
+- BrandProfile
+- TrendCluster
+- Platform target
+- Recent performance summary
+- Content constraints and banned terms
 
-Start with a pragmatic MVP:
+Steps:
 
-- Render a duplicate image or silhouette-like outline behind the image when transparency exists.
-- For non-transparent images, apply border around the image bounding box as a fallback.
-- Add a future task to improve pixel-accurate alpha outline.
+1. Summarize source trend.
+2. Explain why it is or is not suitable for the brand.
+3. Generate platform-native draft.
+4. Run guardrail checks.
+5. Store draft, version, rationale, and warnings.
 
-### Complexity
+Validation:
 
-- Basic upload-to-sticker: low to medium.
-- Pleasant canvas editing: medium.
-- Pixel-perfect cutout border: medium to high.
-- AI background removal: high if self-hosted, medium if API-based.
+- Draft references the chosen trend.
+- Draft follows platform format.
+- Draft avoids banned terms and unsupported claims.
+- Draft includes editable fields rather than one opaque text block.
 
-### Risks
+### Daily Retrospective to Tomorrow Strategy
 
-- Transparent outline quality may vary by input image.
-- Fabric.js object lifecycle can leak memory if not disposed carefully.
-- Exporting very large canvases may fail on mobile browsers.
+Inputs:
 
-### Fallback behavior
+- Yesterday's scheduled/published content.
+- Imported metrics.
+- Draft metadata: trend, topic, hook, platform, time, format.
+- Previous plan.
 
-- If AI is unavailable, keep manual crop and style controls.
-- If ZIP export fails, allow per-sticker PNG export.
-- If local draft save fails, allow immediate PNG export and show a warning.
+Steps:
 
-## Authentication and authorization
+1. Calculate simple performance deltas and rankings.
+2. Identify high-performing topics, hooks, formats, and channels.
+3. Detect weak or inconclusive signals.
+4. Generate daily retrospective.
+5. Update tomorrow's recommended topic mix and draft queue.
 
-None for MVP.
+Validation:
 
-Future accounts can be added only if cloud projects, sharing, or marketplace features become necessary.
+- Changing metric inputs changes the recommendation.
+- Report cites concrete posts and metrics.
+- Low-sample findings are marked as low confidence.
+- User can override and save the override reason.
 
-## Error handling
+## State Management
 
-- Validate file type and size before loading.
-- Show recoverable editor errors in a compact toast area.
-- Keep failed exports from clearing project state.
-- Log development errors to console in local builds.
+- Server owns workflow state in PostgreSQL.
+- UI uses server data via API client and optimistic updates only for small interactions.
+- Long-running jobs return an `agent_run_id`; UI polls or subscribes for status.
+- Draft editor stores autosaved edits as new DraftVersion rows.
 
-## Security and privacy considerations
-
-- MVP keeps uploads local to the browser.
-- Do not send images to remote services unless a future AI feature is explicitly triggered.
-- Add user-facing copy reminding users to upload images they own or have rights to use.
-- Avoid storing raw images in URLs or remote logs.
-- Sanitize file names before export.
-
-## Testing strategy
-
-Unit tests:
-
-- File validation.
-- Project serialization/deserialization.
-- Sticker style reducer.
-- Export filename generation.
-
-Browser tests:
-
-- Upload fixture image.
-- Create sticker.
-- Move and resize object.
-- Export selected sticker.
-- Restore local draft.
-
-Manual visual checks:
-
-- Transparent PNG upload.
-- JPG upload with rectangular border fallback.
-- Scene export at common sizes.
-- ZIP export with 10 and 25 stickers.
-
-## Deployment and environment variables
-
-MVP can deploy with no required secrets.
-
-Future optional environment variables:
-
-```text
-AI_PROVIDER=
-AI_API_KEY=
-NEXT_PUBLIC_MAX_UPLOAD_MB=10
-```
-
-## Observability and operations
+## Authentication and Authorization
 
 MVP:
 
-- Basic client-side error boundary.
-- Manual QA checklist.
+- Single workspace.
+- One admin account or local dev auth gate.
+- API token between web and agent service.
 
-Future:
+Later:
 
-- Privacy-friendly analytics.
-- Export failure tracking.
-- AI cost and rate-limit dashboard.
+- Workspaces, roles, teams, client access, reviewer roles, and SSO.
 
-## Known tradeoffs
+## Error Handling
 
-- Local-first reduces cost and privacy risk but limits cross-device continuity.
-- Avoiding AI in MVP keeps cost low but makes background removal less magical.
-- Fabric.js accelerates editor development but still requires custom sticker-specific effects.
-- No account flow makes onboarding simpler but prevents cloud sharing at launch.
+- Every background job writes status, retries, and error message.
+- Connector errors should include platform, operation, account, and retryability.
+- AI failures should preserve input and allow retry/regenerate.
+- Risky generated content should become `needs_review`, not fail silently.
+
+## Security and Privacy
+
+- Do not store platform passwords.
+- Prefer official OAuth/API tokens where available.
+- Encrypt sensitive connector credentials.
+- Keep unpublished content and brand profile private.
+- Log AI prompts and outputs for audit, but allow future redaction of sensitive data.
+- Do not bypass platform controls.
+
+## Testing Strategy
+
+- Unit tests for scoring, prompt assembly, guardrails, and metric calculations.
+- API tests for draft lifecycle and retrospective generation.
+- Worker tests using fixture trends and metrics.
+- Playwright smoke test for the full daily loop.
+- Snapshot tests for generated structured outputs with mocked LLM responses.
+
+## Deployment and Environment Variables
+
+Example environment variables:
+
+- `DATABASE_URL`
+- `REDIS_URL`
+- `S3_ENDPOINT`
+- `S3_BUCKET`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
+- `LLM_PROVIDER`
+- `LLM_API_KEY`
+- `LLM_BASE_URL`
+- `WEB_APP_URL`
+- `API_INTERNAL_TOKEN`
+- `SENTRY_DSN`
+
+## Observability and Operations
+
+- Agent run table for traceability.
+- Background job dashboard.
+- Structured logs with workspace and agent run IDs.
+- Sentry for frontend/backend exceptions.
+- Daily summary of failed connector jobs.
+- Token usage and cost tracking per workspace.
+
+## Known Tradeoffs
+
+- Python + Next.js is more powerful for AI but more complex than a single TypeScript app.
+- Manual import/export lowers platform risk but makes the MVP less magical.
+- Starting single-workspace accelerates development but delays agency/team features.
+- Using LLMs for recommendations creates explainability and consistency requirements.
